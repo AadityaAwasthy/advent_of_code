@@ -1,21 +1,23 @@
 use std::fs;
 
 fn solve(data: &[&str]) -> i32 {
+    let mut word = [0; 4];
     (0..data.len() as isize)
         .flat_map(|x| (0..data[0].len() as isize).map(move |y| (x, y)))
-        .map(|(x, y)| {
+        .flat_map(|(x, y)| {
             [
-                [(x + 1, y - 1), (x, y), (x - 1, y + 1)], // NE
-                [(x + 1, y + 1), (x, y), (x - 1, y - 1)], // SE
+                [(x, y), (x + 1, y - 1), (x + 2, y - 2), (x + 3, y - 3)], // NE
+                [(x, y), (x + 1, y), (x + 2, y), (x + 3, y)],             // E
+                [(x, y), (x + 1, y + 1), (x + 2, y + 2), (x + 3, y + 3)], // SE
+                [(x, y), (x, y + 1), (x, y + 2), (x, y + 3)],             // S
             ]
         })
         .filter(|coord| {
-            let iter = coord.iter().filter(|row| {
-                let row_collect = row.map(|(x, y)| data.get(x as usize).and_then(|inp| inp.as_bytes().get(y as usize).copied()).unwrap_or_default());
-                &row_collect == b"MAS" || &row_collect == b"SAM"
-            }).count();
-
-            iter == 2
+            let mut iter = coord.iter().map(|(x, y)| {
+                data.get(*x as usize).and_then(|row| row.as_bytes().get(*y as usize).copied()).unwrap_or_default()
+            });
+            word.fill_with(|| iter.next().unwrap_or_default());
+            &word == b"XMAS" || &word == b"SAMX"
         })
         .count() as i32
 }
